@@ -1,0 +1,6 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://192.168.90.64:8061/eureka/
+#      defaultZone: http://192.168.90.64:8061/eureka/
+#      defaultZone: http://localhost:8761/eureka/

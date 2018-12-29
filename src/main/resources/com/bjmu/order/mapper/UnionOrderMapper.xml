@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bjmu.order.mapper.UnionOrderMapper">
+
+    <insert id="insertOrder" parameterType="com.bjmu.order.domain.union.persistence.PerOrder">
+
+
+        <!-- 订单入库 -->
+
+        insert into P_UNION_ORDER
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+
+            <if test="orderId!=null and ''!=orderId">
+              "order_id",
+            </if>
+            <if test="bizType!=null and ''!=bizType">
+              "biz_type",
+            </if>
+            <if test="currencyCode!=null and ''!=currencyCode">
+              "currency_code",
+            </if>
+            <if test="payTimeOut!=null">
+              "pay_time_out",
+            </if>
+            <if test="txnSubType!=null and ''!=txnSubType">
+              "txn_sub_type",
+            </if>
+            <if test="txnTime!=null">
+                "txn_time",
+            </if>
+            <if test="txnType!=null and ''!=txnType">
+                "txn_type",
+            </if>
+            <if test="orderDesc!=null and ''!=orderDesc">
+                "order_desc",
+            </if>
+            <if test="subMerAbbr!=null and ''!=subMerAbbr">
+                "sub_mer_abbr",
+            </if>
+            <if test="subMerId!=null and ''!=subMerId">
+                "sub_mer_id",
+            </if>
+            <if test="subMerName!=null and ''!=subMerName">
+                "sub_mer_name",
+            </if>
+            <if test="payerId!=null and ''!=payerId">
+                "payer_id",
+            </if>
+            <if test="createrId!=null and ''!=createrId">
+                "creater_id",
+            </if>
+            <if test="belongerId!=null and ''!=belongerId">
+                "belonger_id",
+            </if>
+            <if test="txnAmt!=null">
+                "txn_amt",
+            </if>
+            <if test="userId!=null and ''!=userId">
+                "user_id",
+            </if>
+            <if test="userName!=null and ''!=userName">
+                "user_name",
+            </if>
+            <if test="payCount!=null and ''!=payCount">
+                "pay_count",
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId!=null and ''!=orderId">
+                #{orderId},
+            </if>
+            <if test="bizType!=null and ''!=bizType">
+                #{bizType},
+            </if>
+            <if test="currencyCode!=null and ''!=currencyCode">
+                #{currencyCode},
+            </if>
+            <if test="payTimeOut!=null">
+                #{payTimeOut},
+            </if>
+            <if test="txnSubType!=null and ''!=txnSubType">
+                #{txnSubType},
+            </if>
+            <if test="txnTime!=null">
+                #{txnTime},
+            </if>
+            <if test="txnType!=null and ''!=txnType">
+                #{txnType},
+            </if>
+            <if test="orderDesc!=null and ''!=orderDesc">
+                #{orderDesc},
+            </if>
+            <if test="subMerAbbr!=null and ''!=subMerAbbr">
+                #{subMerAbbr},
+            </if>
+            <if test="subMerId!=null and ''!=subMerId">
+                #{subMerId},
+            </if>
+            <if test="subMerName!=null and ''!=subMerName">
+                #{subMerName},
+            </if>
+            <if test="payerId!=null and ''!=payerId">
+                #{payerId},
+            </if>
+            <if test="createrId!=null and ''!=createrId">
+                #{createrId},
+            </if>
+            <if test="belongerId!=null and ''!=belongerId">
+                #{belongerId},
+            </if>
+            <if test="txnAmt!=null">
+                #{txnAmt},
+            </if>
+            <if test="userId!=null and ''!=userId">
+                #{userId},
+            </if>
+            <if test="userName!=null and ''!=userName">
+                #{userName},
+            </if>
+            <if test="payCount!=null and ''!=payCount">
+                #{payCount},
+            </if>
+        </trim>
+    </insert>
+
+    <!--历史订单查询-->
+    <!--
+        1-可以根据orderId查询具体订单
+        2-可以根据查询标志flag==1查询所有未完成订单
+        3-可以根据isNotify结果判断该订单是否已经异步回调
+    -->
+    <select id="queryOrders"
+            parameterType="com.bjmu.order.domain.union.param.SelectOrderParam"
+            resultType="com.bjmu.order.domain.union.persistence.PerOrder">
+
+        select
+        "order_id",
+        "biz_type",
+        "currency_code",
+        "pay_time_out",
+        "txn_sub_type",
+        "txn_time",
+        "txn_type",
+        "order_desc",
+        "sub_mer_abbr",
+        "sub_mer_id",
+        "sub_mer_name",
+        "payer_id",
+        "creater_id",
+        "belonger_id",
+        "crt_time",
+        "txn_amt",
+        "status",
+        "is_notify" from P_UNION_ORDER
+        where 1=1
+        <if test="createrId!=null and ''!=createrId">
+            and "creater_id"=#{createrId}
+        </if>
+        <if test="orderId!=null and ''!=orderId">
+            and  "order_id"=#{orderId}
+        </if>
+        <if test="flag==1">
+            and "status" in (1,10,2,3,30,31,310)
+        </if>
+        <if test="isNotify!=null">
+            and "is_notify"=#{isNotify}
+        </if>
+        <if test="belongerId!=null and ''!=belongerId">
+            and "belonger_id"=#{belongerId}
+        </if>
+        <if test="userId!=null and ''!=userId">
+            and "user_id"=#{userId}
+        </if>
+    </select>
+
+    <update id="updatePayerId">
+        update P_UNION_ORDER set "payer_id"=#{payerId} where "order_id"=#{orderId}
+    </update>
+
+    <select id="getTxnTimeByOrderId" resultType="string" parameterType="string">
+        select to_char("txn_time",'YYYYMMddHHmmss') from P_UNION_ORDER WHERE "order_id"=#{orderId}
+    </select>
+
+    <update id="updateQueryId">
+        update P_UNION_ORDER set "query_id"=#{queryId} where "order_id"=#{orderId}
+    </update>
+
+    <!--查询指定订单信息-->
+    <select id="queryOrdersByOrderId" resultType="com.bjmu.order.domain.union.persistence.PerOrder">
+
+        select
+        "order_id",
+        "biz_type",
+        "currency_code",
+        "pay_time_out",
+        "txn_sub_type",
+        "txn_time",
+        "txn_type",
+        "order_desc",
+        "sub_mer_abbr",
+        "sub_mer_id",
+        "sub_mer_name",
+        "payer_id",
+        "creater_id",
+        "belonger_id",
+        "crt_time",
+        "txn_amt",
+        "status",
+        "is_notify",
+        "pay_success_time",
+        "notify_sub_mer_time",
+        "trade_success_time",
+        "user_id",
+        "status",
+        "query_id",
+        "pay_type"
+         from P_UNION_ORDER
+        where 1=1 and "order_id"=#{orderId}
+
+    </select>
+
+    <select id="queryOrdersByUserId" resultType="com.bjmu.order.domain.union.persistence.PerOrder">
+        select
+        "order_id",
+        "biz_type",
+        "currency_code",
+        "pay_time_out",
+        "txn_sub_type",
+        "txn_time",
+        "txn_type",
+        "order_desc",
+        "sub_mer_abbr",
+        "sub_mer_id",
+        "sub_mer_name",
+        "payer_id",
+        "creater_id",
+        "belonger_id",
+        "crt_time",
+        "txn_amt",
+        "status",
+        "user_id",
+        "user_name",
+        "pay_count",
+        "is_notify" from P_UNION_ORDER
+        where 1=1 and "user_id"=#{userId}
+        <if test="flag==1">
+            and "status" in  (1,2,31)
+        </if>
+    </select>
+
+    <update id="updateStatusByOrderId">
+
+        update P_UNION_ORDER SET
+            <if test="queryId!=null and ''!=queryId">
+                "query_id"=#{queryId},
+            </if>
+            <if test="payType!=null and ''!=payType">
+                "pay_type"=#{payType},
+            </if>
+            "status"=3,"is_notify"=1,"pay_success_time"=SYSDATE where "order_id"=#{orderId}
+    </update>
+
+    <update id="updateSubMerOrderId">
+        update P_UNION_ORDER SET "sub_mer_order_id"=#{subMerOrderId} where "order_id"=#{orderId}
+    </update>
+
+</mapper>
